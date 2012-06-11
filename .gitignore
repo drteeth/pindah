@@ -3,3 +3,4 @@ test/garrett
 *.swp
 Gemfile.lock
 .redcar/
+*.gem

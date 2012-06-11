@@ -70,14 +70,14 @@ module Pindah
     @spec[:target] ||= TARGETS[@spec[:target_version].to_s.sub(/android-/, '')]
     @spec[:classes] ||= "#{@spec[:output]}/classes/"
     @spec[:classpath] << @spec[:classes]
-    
+
     if @spec.has_key?(:libraries)
       @spec[:libraries].each do |path|
         # TODO: do libraries always build to bin/classes?
         @spec[:classpath] << "#{File.expand_path path}/bin/classes/"
       end
     end
-    
+
     @spec[:classpath] << "#{@spec[:sdk]}/platforms/android-#{@spec[:target]}/android.jar"
     @spec[:log_spec] ||= "ActivityManager:I #{@spec[:name]}:D " +
       "AndroidRuntime:E *:S"
@@ -104,7 +104,7 @@ module Pindah
       "classpath" => @spec[:classpath].join(Java::JavaLang::System::
                                             getProperty("path.separator"))
     }
-    
+
     if @spec.has_key?(:libraries)
       @spec[:libraries].each_with_index do |path, i|
         prop = "android.library.reference.#{i + 1}"
@@ -112,7 +112,7 @@ module Pindah
         user_properties[prop] = path
       end
     end
-    
+
     user_properties.each do |key, value|
       @ant.project.set_user_property(key, value)
     end
@@ -122,7 +122,7 @@ module Pindah
     # Turn ant tasks into rake tasks
     ANT_TASKS.each do |name, description|
       ant_name = ANT_TASK_MAP[name]
-      
+
       desc @ant.project.targets[ant_name].description
       task(name) do
         add_signature_properties if SIGNED_TASKS.include?(name)
@@ -141,27 +141,27 @@ module Pindah
       # command line.
       #
       # So, we'll work around this for now. Icky.
-      # 
+      #
       # See: http://jira.codehaus.org/browse/JRUBY-4827
       puts "Please enter keystore password (store:#{@spec[:key_store]}):"
       store_pw = STDIN.gets.chomp
 
       puts "Please enter password for alias '#{@spec[:key_alias]}':"
       alias_pw = STDIN.gets.chomp
-      
+
       signature_properties = {
         "key.store" => @spec[:key_store],
         "key.alias" => @spec[:key_alias],
         "key.store.password" => store_pw,
         "key.alias.password" => alias_pw
       }
-      
+
       signature_properties.each do |key, value|
         @ant.project.set_user_property(key, value)
       end
-      
+
       # NB: we need to do this again to actually set the new properties.
       Ant::ProjectHelper.configure_project(@ant.project, java.io.File.new(@build.path))
-    end    
+    end
   end
 end

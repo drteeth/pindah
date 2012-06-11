@@ -2,9 +2,9 @@ require 'fileutils'
 require 'erb'
 
 module PindahCLI
-  DEFAULT_TARGET_VERSION = '2.1'
+  DEFAULT_TARGET_VERSION = '4.0.3'
 
-  def self.create(package, location=nil, activity_name=nil)
+  def self.create(package, location=nil, activity_name='HomeActivity')
     segments = package.split('.')
     location ||= segments.last
     src_dir  = File.join(location, 'src', *segments)
@@ -36,7 +36,7 @@ module PindahCLI
                              "drawable-#{s}", "ic_launcher.png"),
                    File.join(location, "res", "drawable-#{s}", "ic_launcher.png"))
     end
-    
+
     log "Created project in #{location}."
 
     if activity_name
@@ -50,6 +50,7 @@ module PindahCLI
         f.puts ERB.new(template_with_classname).result(binding)
       end
       log "Created Activity '#{activity_name}' in '#{activity_location}'."
+      log "cp $ANDROID_SDK_ROOT/extras/android/support/v4/android-support-v4.jar ./#{location}/libs/"
     end
   end
 
@@ -61,7 +62,7 @@ module PindahCLI
 
   def self.create_templated(name, project_location, scope)
     location = File.join(project_location, name)
-    template = File.read(File.join(File.dirname(__FILE__), 
+    template = File.read(File.join(File.dirname(__FILE__),
                                    '..', 'templates', name))
 
     File.open(location, 'w') do |f|
